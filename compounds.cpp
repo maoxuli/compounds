@@ -11,7 +11,6 @@
 #include <fstream>
 #include <time.h>
 
-// Swith to print out testing info
 // #define _TEST 
 
 //
@@ -21,12 +20,13 @@
 //
 #define LETTER_NUMBER 26
 #define CHAR_TO_INDEX(c) (c - 'a')
+
 struct TrieNode
 {
-	bool isWord; // Terminaton of a word
-	bool isCompound; // Prefix is a compound
+	bool isWord; // Prefix is a word
+	bool isCompound; // Prefix is a compound (not necessary a word)
 	struct TrieNode* children[LETTER_NUMBER]; // Children[0] for letter 'a' ...
-	struct TrieNode* parent; // Back track to parent
+	struct TrieNode* parent; // Back track to parent, using in dynamic programming
 	
 	TrieNode(TrieNode* owner = NULL)
 	: isWord(false)
@@ -44,7 +44,7 @@ struct TrieNode
 		clear();
 	}
 	
-	// Clear the sub Trie following this node 
+	// Clear the sub trees following this node 
 	void clear()
 	{
 		for(int i=0; i<LETTER_NUMBER; i++)
@@ -77,7 +77,7 @@ public:
 		
 		std::string line;
 		const std::string delim = " \t\n\r";
-		clock_t t1 = clock(); // Timer start
+		clock_t t1 = clock(); // Timer for loading dictionary
 		while(getline(infile, line)) 
 		{
 			std::string::size_type beg = line.find_first_not_of(delim); // Forward blank
@@ -145,6 +145,8 @@ public:
 #endif
 	
 	// Find coumpounds
+	// Traverse the Trie
+	// Calculate DP and find compounds during traversal
 	// Return total number and the first two longest
 	size_t findCompounds(std::vector<std::string>& words)
 	{
@@ -155,7 +157,7 @@ public:
 		
 		// Traverse to calculate DP and find compounds
 		std::string prefix;
-		clock_t t1 = clock(); // Timer start
+		clock_t t1 = clock(); // Timer for travesal to find compounds
 		traverse(prefix, &_root);
 		clock_t t2 = clock(); // Timer end
 		std::cout << "Running time for find compounds:" << (t2-t1)*1000/CLOCKS_PER_SEC << "ms" << std::endl;
@@ -165,8 +167,8 @@ public:
 	}
 	
 private:
-	// Root of customized Trie
-	// Constructed with functions of load*()
+	// Root of Trie
+	// Trie is constructed with functions of load*()
 	TrieNode _root;
 	
 	// Totoal compounds number and first two longest compounds
@@ -180,8 +182,9 @@ private:
 	void insert(const std::string& s)
 	{
 		size_t len = s.length();
+		assert(len > 0);
+		
 	    TrieNode* node = &_root;
-
 		unsigned char index = 0;
 	    for(size_t i = 0; i < len; i++ )
 	    {
@@ -201,8 +204,9 @@ private:
 	bool search(const std::string& s)
 	{
 	    size_t len = s.length();
+		assert(len > 0);
+		
 	    TrieNode* node = &_root;
-
 		unsigned char index = 0;
 	    for(size_t i = 0; i < len; i++ )
 	    {
@@ -217,7 +221,7 @@ private:
 	}
 	
 	// Customized traversal of Trie
-	// Calculate DP for each node
+	// Calculate DP for each node and find compounds during traversal
 	void traverse(std::string& prefix, TrieNode* node) 
 	{
 #ifdef _TEST
@@ -227,27 +231,27 @@ private:
 		}
 #endif
 		// Back track 
-		// find a node where isCompound == true
-		// check suffix is a word
+		// find a node where prefix is a compound or a word
+		// and check if suffix is a word
 		size_t n = 0; // Length of suffix
 		TrieNode* p = node;
 		while((p = p->parent) != NULL)
 		{
 			n++;
-			if(p->isCompound || p->isWord)
+			if(p->isCompound || p->isWord) // Prefix is a compound or a word
 			{
 				if(search(prefix.substr(prefix.length() - n))) // suffix is a word
 				{
-					node->isCompound = true;
-					if(node->isWord)
+					node->isCompound = true; // Mark prefix to this node to be a compound
+					if(node->isWord) // Find a compound word
 					{
-						_count++;
-						if(prefix.length() > _longest.length())
+						_count++; // Total number of compound words
+						if(prefix.length() > _longest.length()) // Track the longest one
 						{
 							_second = _longest;
 							_longest = prefix;
 						}
-						else if(prefix.length() > _second.length())
+						else if(prefix.length() > _second.length()) // Track the second one
 						{
 							_second = prefix;
 						}
@@ -257,6 +261,7 @@ private:
 			}
 		}
 		
+		// Recursive to traverse
 		for(unsigned char index = 0; index < LETTER_NUMBER; index++) 
 		{
 	    	char letter = 'a' + index;
@@ -276,12 +281,13 @@ private:
 // 
 int main(int argc, const char* argv[])
 {
+	// Load testing dictionary from file
 	std::string file("wordsforproblem.txt");
 	Dictionary dict;
 	if(!dict.loadFromFile(file))
 	{
 		std::cout << "Failed to load " << file << std::endl;
-		dict.loadTestWords();
+		dict.loadTestWords(); // Load testing words
 	}
 	
 #ifdef _TEST
@@ -289,8 +295,8 @@ int main(int argc, const char* argv[])
 	dict.testTraverse();
 #endif
 	
-	std::vector<std::string> words;
-	size_t count = dict.findCompounds(words); // return the total number of compounds
+	std::vector<std::string> words; // Return compound words that was tracked
+	size_t count = dict.findCompounds(words); // return the total number of compound words in dictionary
 	std::cout << "Total number of compound words is: " << count << std::endl;
 	std::cout << "The longest " << words.size() << " compound words are: " << std::endl; 	
 	for(std::vector<std::string>::const_iterator it = words.begin(); it != words.end(); ++it)
