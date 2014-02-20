@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{FD0FEF80-4C09-48EF-8918-9FA15F1DAC3B}</ProjectGuid>
+    <ProjectGuid>{C68BFC4F-1C51-4BAA-AB04-3641BFB17671}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>compounds</RootNamespace>
   </PropertyGroup>

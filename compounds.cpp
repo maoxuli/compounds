@@ -283,16 +283,13 @@ int main(int argc, const char* argv[])
 {
 	// Load testing dictionary from file
 	std::string file("wordsforproblem.txt");
+	std::cout << "Load dictionary from " << file << std::endl;
 	Dictionary dict;
 	if(!dict.loadFromFile(file))
 	{
 		std::cout << "Failed to load " << file << std::endl;
 		dict.loadTestWords(); // Load testing words
 		std::cout << "Load test words in the example." << std::endl;
-	}
-	else
-	{
-		std::cout << "Successful to load " << file << std::endl;
 	}
 	
 #ifdef _TEST
