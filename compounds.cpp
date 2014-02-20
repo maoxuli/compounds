@@ -9,6 +9,7 @@
 #include <vector>
 #include <cassert>
 #include <fstream>
+#include <time.h>
 
 // Swith to print out testing info
 // #define _TEST 
@@ -75,7 +76,7 @@ public:
 		_root.clear();
 		
 		std::string line;
-		const std::string delim = {" \t\n\r"};
+		const std::string delim = " \t\n\r";
 		clock_t t1 = clock(); // Timer start
 		while(getline(infile, line)) 
 		{
@@ -199,7 +200,7 @@ private:
 	// Search a word from Trie
 	bool search(const std::string& s)
 	{
-	    int len = s.length();
+	    size_t len = s.length();
 	    TrieNode* node = &_root;
 
 		unsigned char index = 0;
@@ -297,5 +298,6 @@ int main(int argc, const char* argv[])
 		std::cout << *it << std::endl;
 	}
 	
+	getchar();
 	return 0;
 }
