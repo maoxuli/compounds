@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <fstream>
 
 // Swith to print out testing info
 #define _TEST 
@@ -56,7 +57,32 @@ class Dictionary
 public:
 	bool loadFromFile(const std::string& path)
 	{
-		return false;
+		std::ifstream infile(path.c_str());
+		if(!infile)
+		{
+			return false;
+		}
+		
+		std::string line;
+		const std::string delim = {" \t\n\r"};
+		while(getline(infile, line)) 
+		{
+			std::string::size_type beg = line.find_first_not_of(delim);
+			if(beg == std::string::npos)
+			{
+				continue;
+			}
+		    else 
+			{
+				std::string::size_type end = line.find_first_of(delim, beg);
+				if(end == std::string::npos)
+				{
+					end = line.length();
+				}
+		      	insert(line.substr(beg, end - beg));
+		    }
+		}
+		return true;
 	}
 	
 	void loadTestWords()
@@ -194,7 +220,7 @@ int main(int argc, const char* argv[])
 	// Test
 #ifdef _TEST
 	dict.testSearch();
-	dict.testTraverse();
+	//dict.testTraverse();
 #endif
 	
 	std::vector<std::string> words;
