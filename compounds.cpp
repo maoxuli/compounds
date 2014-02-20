@@ -288,6 +288,11 @@ int main(int argc, const char* argv[])
 	{
 		std::cout << "Failed to load " << file << std::endl;
 		dict.loadTestWords(); // Load testing words
+		std::cout << "Load test words in the example." << std::endl;
+	}
+	else
+	{
+		std::cout << "Successful to load " << file << std::endl;
 	}
 	
 #ifdef _TEST
